@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Image, StyleSheet, TextInput, View } from 'react-native';
+import { Button, Image, ImageBackground, StyleSheet, Text, TextInput, View } from 'react-native';
 import NavigatorContainer from '../App';
 
 export default class Start extends Component {
@@ -14,7 +14,8 @@ export default class Start extends Component {
         <View style={styles.container}>
             <ImageBackground 
                 style={styles.background}
-                src={'../assets/Background Image.png'}>
+                //source={'../assets/Background Image.png'}
+                >
                     <Text style={styles.title}>Let's Chat</Text>
             <View style={styles.startBox}>
                 <TextInput

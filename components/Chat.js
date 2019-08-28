@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Image, StyleSheet, TextInput, View } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
 //import NavigatorContainer from '../App';
 
 export default class Chat extends Component {
@@ -14,7 +14,6 @@ export default class Chat extends Component {
         <View style={styles.container}>
             
                 <Text>Welcome to the Chat screen!</Text>
-            //
         </View>
     );
   }
