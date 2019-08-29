@@ -3,20 +3,21 @@ import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
 //import NavigatorContainer from '../App';
 
 export default class Chat extends Component {
-     
-  constructor(props) {
-    super(props);
-    this.state={ name: ''}
-  }
+    
+    static navigationOptions= ( { navigation }) => {
+        return {
+            title: navigation.getParam('name'),
+        };
+    }   
 
-  render() {
-    return (
-        <View style={styles.container}>
+    render() {
+        return (
+            <View style={[styles.container, {backgroundColor: this.props.navigation.state.params.bColor}]}>
             
                 <Text>Welcome to the Chat screen!</Text>
-        </View>
-    );
-  }
+            </View>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
