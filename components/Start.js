@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
-import { Button, Image, ImageBackground, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import NavigatorContainer from '../App';
 
 export default class Start extends Component {
      
   constructor(props) {
     super(props);
-    this.state={ name: ''}
+    this.state={ 
+        name: '',
+        bColor: '#090C08',
+    }
   }
 
   render() {
@@ -14,7 +17,7 @@ export default class Start extends Component {
         <View style={styles.container}>
             <ImageBackground 
                 style={styles.background}
-                //source={'../assets/Background Image.png'}
+                source={require('../assets/BackgroundImage.png')}
                 >
                     <Text style={styles.title}>Let's Chat</Text>
             <View style={styles.startBox}>
@@ -26,12 +29,36 @@ export default class Start extends Component {
                 />
                 <Text>Choose Background Color:</Text>
                 <View style={styles.colorBox}>
-                    <View style={styles.colorCircle1RadioButton}>
-                    </View>
+                    
+                    
+                    <TouchableOpacity 
+                        style={(this.state.bColor==='#090C08') 
+                        ? [styles.colorCircles, styles.circle1, styles.selected]
+                        : [styles.colorCircles, styles.circle1]}
+                        onPress={()=>{this.setState({bColor:'#090C08'})}}
+                    ></TouchableOpacity>
+                   <TouchableOpacity 
+                        style={(this.state.bColor==='#474056') 
+                        ? [styles.colorCircles, styles.circle2, styles.selected]
+                        : [styles.colorCircles, styles.circle2]}
+                        onPress={()=>{this.setState({bColor:'#474056'})}}
+                    ></TouchableOpacity>
+                    <TouchableOpacity 
+                        style={(this.state.bColor==='#8A95A5') 
+                        ? [styles.colorCircles, styles.circle3, styles.selected]
+                        : [styles.colorCircles, styles.circle3]}
+                        onPress={()=>{this.setState({bColor:'#8A95A5'})}}
+                    ></TouchableOpacity>
+                    <TouchableOpacity 
+                        style={(this.state.bColor==='#B9C6AE') 
+                        ? [styles.colorCircles, styles.circle4, styles.selected]
+                        : [styles.colorCircles, styles.circle4]}
+                        onPress={()=>{this.setState({bColor:'#B9C6AE'})}}
+                    ></TouchableOpacity>
                 </View>
                 <Button 
                     style={styles.button}
-                    onPress={()=>this.props.navigation.navigate('Chat')}
+                    onPress={()=>this.props.navigation.navigate('Chat', {name: this.state.name, bColor: this.state.bColor })}
                     title="Start Chatting"
                 />
             </View>
@@ -45,8 +72,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'stretch',
+    justifyContent: 'space-between',
   },
   background: {
       width: '100%',
@@ -55,15 +82,17 @@ const styles = StyleSheet.create({
   title: {
       fontSize: 45,
       fontWeight: '600',
-      color: '#757083',
+      color: '#FFFFFF',
       opacity: .5,
+      alignItems: 'center',
+      justifyContent: 'center'
   },
   startBox: {
       backgroundColor: 'white',
       width: '88%',
       height: '44%',
-      alignItems: 'flex-end',
-      justifyContent: 'center',
+      alignItems: 'baseline',
+      justifyContent: 'space-evenly',
 
   },  
   textInput: {
@@ -76,26 +105,36 @@ const styles = StyleSheet.create({
       fontSize: 16,
       fontWeight: '300',
       color: '#757083',
-      opacity: 1
+      opacity: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
   },
   colorCircles: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      alignItems: 'center',
-      justifyContent: 'center',
+    height: 50,
+    width: 50,
+    borderRadius: 25,
+    
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  circle1RadioButton: {
+  circle1: {
       backgroundColor: '#090C08',
   },
-  circle2RadioButton: {
+  circle2: {
       backgroundColor: '#474056',
   },
-  circle3RadioButton: {
+  circle3: {
       backgroundColor: '#8A95A5',
   },
-  circle4RadioButton: {
+  circle4: {
       backgroundColor: '#B9C6AE',
+  },
+  selected: {
+    height: 50,
+    width: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#000',
   },
   button: {
       fontSize: 16,
