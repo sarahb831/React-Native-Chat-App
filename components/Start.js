@@ -71,15 +71,16 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     backgroundColor: '#fff',
-    alignItems: 'flex-end',
-    justifyContent: 'flex-end',
+    //alignItems: 'flex-start',
+    //justifyContent: 'space-evenly',
   },
   background: {
       width: '100%',
       height: '100%',
   },
   title: {
-      flex: 0.3,
+      padding: 40,
+      flex: .9,
       fontSize: 45,
       fontWeight: '600',
       color: '#FFFFFF',
@@ -88,11 +89,13 @@ const styles = StyleSheet.create({
       justifyContent: 'center'
   },
   startBox: {
-      backgroundColor: 'white',
-      flex: .44,
+      backgroundColor: 'white',  
+      flex: .9,
+      margin:12,
+      height: '44%',
       width: '88%',
-      alignSelf: 'center',
-      alignItems: 'baseline',
+      alignSelf: 'center', //adjusts horizontal position
+      alignItems: 'center',
       justifyContent: 'space-evenly',
       padding: 6,
   },  
