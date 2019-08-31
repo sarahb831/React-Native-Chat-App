@@ -19,6 +19,13 @@ export default class Chat extends Component {
                     avatar: 'https://placeimg.com/140/140/any',
                 },
             },
+            {
+                _id: 2,
+                // include name entered on Start screen in message
+                text: `${this.props.navigation.state.params.name}`+' has entered the chat',
+                createdAt: new Date(),
+                system: true,
+            }
         ],
     };
 
@@ -39,7 +46,7 @@ export default class Chat extends Component {
               },
               {
                   _id: 2,
-                  text: 'This is a system message',
+                  text: 'This is a system message in ComponentDidMount()',
                   createdAt: new Date(),
                   system: true,
               }
@@ -63,6 +70,8 @@ export default class Chat extends Component {
         };
     }   
 
+    /* change bubble appearance
+    */
     renderBubble(props) {
         return (
             <Bubble
