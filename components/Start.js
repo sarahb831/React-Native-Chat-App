@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import { Button, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+// import Platform to determine which OS
+import { Platform } from 'react-native';
+
+// import keyboard spacer so Android keyboard doesn't hide message input field
+import KeyboardSpacer from 'react-native-keyboard-spacer';
 
 export default class Start extends Component {
      
@@ -27,6 +32,7 @@ export default class Start extends Component {
                 value={this.state.name}
                 placeholder='Your Name'
                 />
+                { Platform.OS === 'android' ? <KeyboardSpacer /> : null }
                 <Text style={styles.colorBox}>Choose Background Color:</Text>
                 <View style={styles.colorBox}>              
                     <TouchableOpacity 
@@ -71,8 +77,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     backgroundColor: '#fff',
-    //alignItems: 'flex-start',
-    //justifyContent: 'space-evenly',
   },
   background: {
       width: '100%',
