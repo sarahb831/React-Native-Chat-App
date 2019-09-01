@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
   },
   title: {
       padding: 40,
+      /* omit to prevent wacky android display with keyboard */
       /* flex: .9, */
       fontSize: 45,
       fontWeight: '600',
