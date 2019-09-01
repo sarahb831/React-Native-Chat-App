@@ -32,7 +32,7 @@ export default class Start extends Component {
                 value={this.state.name}
                 placeholder='Your Name'
                 />
-                { Platform.OS === 'android' ? <KeyboardSpacer /> : null }
+                
                 <Text style={styles.colorBox}>Choose Background Color:</Text>
                 <View style={styles.colorBox}>              
                     <TouchableOpacity 
@@ -66,6 +66,7 @@ export default class Start extends Component {
                     title="Start Chatting"
                 />
             </View>
+            { Platform.OS === 'android' ? <KeyboardSpacer /> : null }
             </ImageBackground>
         </View>
     );
