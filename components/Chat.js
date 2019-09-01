@@ -11,7 +11,7 @@ export default class Chat extends Component {
         messages: [
             {
                 _id: 1,
-                text: 'Hello my favorite chatter',
+                text: 'Hello to my favorite chatter!',
                 createdAt: new Date(),
                 user: {
                     _id: 2,
