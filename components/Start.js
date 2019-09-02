@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Button, ImageBackground, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // import Platform to determine which OS
 import { Platform } from 'react-native';
@@ -25,7 +25,10 @@ export default class Start extends Component {
                 source={require('../assets/BackgroundImage.png')}
                 >
                     <Text style={styles.title}>Let's Chat</Text>
-            <View style={styles.startBox}>
+            <KeyboardAvoidingView
+                style={styles.startBox}
+                behavior = 'padding'
+                enabled >
                 <TextInput
                 style={styles.textInput}
                 onChangeText={(name)=>{this.setState({name})}}
@@ -65,7 +68,7 @@ export default class Start extends Component {
                     onPress={()=>this.props.navigation.navigate('Chat', {name: this.state.name, bColor: this.state.bColor })}
                     title="Start Chatting"
                 />
-            </View>
+            </KeyboardAvoidingView>
             { Platform.OS === 'android' ? <KeyboardSpacer /> : null }
             </ImageBackground>
         </View>
