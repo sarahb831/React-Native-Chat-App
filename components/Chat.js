@@ -47,6 +47,8 @@ export default class Chat extends Component {
         this.referenceMessagesUser = null;
     };
 
+    _isMounted = false;
+
     async componentDidMount() {
     /* set initial message on display */
 // doesn't seem to be setting state
@@ -73,7 +75,7 @@ export default class Chat extends Component {
         })
 
         // authenticate user anonymously with Firebase
-       this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
+       this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
             if (!user) {
                 await firebase.auth().signInAnonymously();
             }
@@ -84,20 +86,25 @@ export default class Chat extends Component {
             });
 
         // create a reference to the active user's documents (messages)
-        this.referenceMessagesUser = firebase.firestore().collection('messages').where("userId", "==", this.state.messages.user._id);
+        this.referenceMessagesUser = firebase.firestore().collection('messages').where("uid", "==", this.state.uid);
       // listen for collection changes for current user 
       this.unsubscribeMessagesUser = this.referenceMessagesUser.onSnapshot(this.onCollectionUpdate);
 
           }
         );
+        this._isMounted = true;
     }
 
     componentWillUnmount() {
-        // stop listening to authentication
-        this.authUnsubscribe();
+        if (this._isMounted) {
+            // stop listening to authentication
+            this.authUnsubscribe();
 
-        // stope listening to changes
-        this.unsubscribeMessagesUser();
+            // stop listening to changes
+            this.unsubscribeMessagesUser();
+
+            this._isMounted = false;
+        }
     }
 
     onCollectionUpdate = (querySnapshot) => {
@@ -143,15 +150,17 @@ export default class Chat extends Component {
     /* add a new message to the collection 
     */
    addMessage() {
+       //access last message in array
+       const index = this.state.messages.length - 1
        this.referenceMessages.add({
-            uid: this.state.uid,
+            uid: (this.state.uid) ? this.state.uid : 0 ,
             // giftedchat object format here
             _id: 1,
-            text: this.state.messages.text,
-            createdAt: this.state.messages.createAt,
-            userId: this.state.messages.user._id,
-            userName: this.props.navigation.state.params.name,
-            userAvatar: this.state.user.avatar,
+            text: (this.state.messages[index].text) ? this.state.messages[index].text : "",
+            createdAt: (this.state.messages[index].createAt) ? this.state.messages[index].createAt : "",
+            userId: (this.state.messages[index].user._id) ? this.state.messages[index].user._id : "",
+            userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "", 
+            userAvatar: (this.state.messages[index].user.avatar) ? this.state.messages[index].user.avatar : "",
         })
    }
 
@@ -174,14 +183,15 @@ export default class Chat extends Component {
             <View // background color is selected on Start screen
             style={[styles.container, {backgroundColor: this.props.navigation.state.params.bColor}]}>
             
-                <GiftedChat
-                    messages = {this.state.messages}
+                {(this._isMounted) && <GiftedChat
+                    messages = {(this.state.messages) ? this.state.messages : []}
                     onSend =  {messages => this.onSend(messages)}
                     renderBubble = {this.renderBubble.bind(this)}
                     user = {{
                         _id: 1,
                     }}
                 />
+                }
                 { Platform.OS === 'android' ? <KeyboardSpacer /> : null }
             </View>
         );
