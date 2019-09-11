@@ -67,7 +67,7 @@ export default class Chat extends Component {
                 {
                 _id: uuidv4(),
                 // include name entered on Start screen in message
-                text: `${this.props.navigation.state.params.name}`+' has entered the chat',
+                text: 'Welcome to the chat, ' + `${this.props.navigation.state.params.name}`,
                 createdAt: new Date(),
                 system: true,
                 }
@@ -76,7 +76,8 @@ export default class Chat extends Component {
 
         // authenticate user anonymously with Firebase
        this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-            if (!user) {
+           // if new user or user name has changed
+            if (!user || (this.props.navigation.state.params.name !== user.name)) {
                 await firebase.auth().signInAnonymously();
             }
 
