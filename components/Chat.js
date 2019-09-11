@@ -5,6 +5,7 @@ import { StyleSheet, View, Platform } from 'react-native';
 // import firebase and firestore for messages database
 const firebase = require('firebase');
 require('firebase/firestore');
+const uuidv4 = require('uuid/v4');
 
 // import keyboard spacer so Android keyboard doesn't hide message input field
 import KeyboardSpacer from 'react-native-keyboard-spacer';
@@ -51,12 +52,11 @@ export default class Chat extends Component {
 
     async componentDidMount() {
     /* set initial message on display */
-// doesn't seem to be setting state
         this.setState({
             messages: [
                 { 
-                    _id: 2,
-                    text: 'Hello developer',
+                    _id: uuidv4(),
+                    text: 'Hello to my favorite chatter!',
                     createdAt: new Date(),
                     user: {
                         _id: 2,
@@ -65,7 +65,7 @@ export default class Chat extends Component {
                     },
                 },
                 {
-                _id: 2,
+                _id: uuidv4(),
                 // include name entered on Start screen in message
                 text: `${this.props.navigation.state.params.name}`+' has entered the chat',
                 createdAt: new Date(),
@@ -86,7 +86,7 @@ export default class Chat extends Component {
             });
 
         // create a reference to the active user's documents (messages)
-        this.referenceMessagesUser = firebase.firestore().collection('messages').where("uid", "==", this.state.uid);
+        this.referenceMessagesUser = await firebase.firestore().collection('messages').where("uid", "==", this.state.uid);
       // listen for collection changes for current user 
       this.unsubscribeMessagesUser = this.referenceMessagesUser.onSnapshot(this.onCollectionUpdate);
 
@@ -101,8 +101,9 @@ export default class Chat extends Component {
             this.authUnsubscribe();
 
             // stop listening to changes
-            this.unsubscribeMessagesUser();
-
+            if (this.unsubscribeMessagesUser) {
+                this.unsubscribeMessagesUser();
+            }
             this._isMounted = false;
         }
     }
@@ -129,7 +130,7 @@ export default class Chat extends Component {
         this.setState({ messages });
     }
       
-    /* append the newest message (at time the change is applied) to the 
+    /* append the newest message (when user presses 'send' to the 
     messages object so that it can be displayed in the chat trail
     */
     onSend(messages = []) {
@@ -147,22 +148,23 @@ export default class Chat extends Component {
         };
     }   
 
-    /* add a new message to the collection 
-    */
+    /* add a new message to the collection in firebase  */
    addMessage() {
        //access last message in array
-       const index = this.state.messages.length - 1
-       this.referenceMessages.add({
-            uid: (this.state.uid) ? this.state.uid : 0 ,
-            // giftedchat object format here
-            _id: 1,
-            text: (this.state.messages[index].text) ? this.state.messages[index].text : "",
-            createdAt: (this.state.messages[index].createAt) ? this.state.messages[index].createAt : "",
-            userId: (this.state.messages[index].user._id) ? this.state.messages[index].user._id : "",
-            userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "", 
-            userAvatar: (this.state.messages[index].user.avatar) ? this.state.messages[index].user.avatar : "",
-        })
-   }
+       if (this.state.messages.length > 0) {
+        const index = this.state.messages.length - 1
+        this.referenceMessages.add({
+             uid: (this.state.uid) ? this.state.uid : 0 ,
+                // giftedchat object format here
+                _id: uuidv4(),
+                text: (this.state.messages[index].text) ? this.state.messages[index].text : "",
+                createdAt: (this.state.messages[index].createAt) ? this.state.messages[index].createAt : "",
+                userId: (this.state.messages[index].user._id) ? this.state.messages[index].user._id : "",
+                userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "", 
+                userAvatar: (this.state.messages[index].user.avatar) ? this.state.messages[index].user.avatar : "",
+            })
+        }
+    }
 
     /* change message bubble appearance
     */
@@ -172,7 +174,7 @@ export default class Chat extends Component {
                 { ...props }
                 wrapperStyle = {{
                     right: {
-                        backgroundColor: 'purple'
+                        backgroundColor: 'lightblue'
                     }
                 }}
                 />
