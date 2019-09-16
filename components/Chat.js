@@ -153,10 +153,16 @@ export default class Chat extends Component {
         messages object so that it can be displayed in the chat trail
     */
     onSend(messages = []) {
-    this.setState(previousState => ({
-        messages: GiftedChat.append(previousState.messages, messages),
-    }))
+    //    console.log('lkjfdl',messages)
+    this.setState(previousState => {
+        GiftedChat.append(previousState.messages,messages)
+        return{ 
 
+        messages: [...previousState.messages,messages[0]]
+    
+    }})
+
+console.log('jjjl',this.state.messages)
     this.addMessage();
     }
 
@@ -171,16 +177,19 @@ export default class Chat extends Component {
     addMessage() {
         //access last message in array
         if (this.state.messages.length > 0) {
-            const index = this.state.messages.length - 1
+            const index = this.state.messages.length - 2
+            //console.log('index', index);
+          //  console.log('message',this.state.messages)
+
             this.referenceMessages.add({
                 uid: (this.state.uid) ? this.state.uid : 0 ,
                 // giftedchat object format here
                 _id: uuidv4(),
-                text: (this.state.messages[index].text) ? this.state.messages[index].text : "no text",
-                createdAt: (this.state.messages[index].createdAt) ? this.state.messages[index].createdAt : "yesterday",
-                userId: (this.state.messages[index].user._id) ? this.state.messages[index].user._id : "0",
+                text: (this.state.messages[index][0].text) ? this.state.messages[index][0].text : "no text",
+                createdAt: (this.state.messages[index].createdAt) ? this.state.messages[index][0].createdAt : "yesterday",
+                userId: (this.state.messages[index].user._id) ? this.state.messages[index][0].user._id : "0",
                 userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "",
-                userAvatar: (this.state.messages[index].user.avatar) ? this.state.messages[index].user.avatar : "",
+                userAvatar: (this.state.messages[index].user.avatar) ? this.state.messages[index][0].user.avatar : "",
             })
         }
     }
