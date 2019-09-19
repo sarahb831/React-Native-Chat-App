@@ -131,7 +131,7 @@ export default class Chat extends Component {
         let messages = [];
 
         // go through each document
-        querySnapshot.docs.forEach((doc) => {
+        querySnapshot.forEach((doc) => {
             // get QueryDocumentSnapshot's database
             var data = doc.data();
             messages.push({
@@ -146,24 +146,24 @@ export default class Chat extends Component {
             });
         });
         // set messages state to be this array of messages
-        this.setState(previousState => ({ messages: [...previousState.messages, messages]}));
+//        this.setState(previousState => ({ messages: [...previousState.messages, messages]}));
+// try going back to this instead 9/18/19
+        this.setState({ messages, });
+        console.log('onCollectionUpdate messages:', messages)
+
     }
 
     /* append the newest message (when user presses 'send') to the 
         messages object so that it can be displayed in the chat trail
     */
-    onSend(messages = []) {
-    //    console.log('lkjfdl',messages)
-    this.setState(previousState => {
-        GiftedChat.append(previousState.messages,messages)
-        return{ 
-
-        messages: [...previousState.messages,messages[0]]
+    onSend(newMessage) {
+        console.log('lkjfdl  newMessage:',newMessage)
+        this.setState(previousState => ({
+            messages: GiftedChat.append(previousState.messages,newMessage),
+        }))
     
-    }})
-
 console.log('jjjl',this.state.messages)
-    this.addMessage();
+        this.addMessage(newMessage);
     }
 
     // display name entered on Start screen in nav bar
@@ -174,22 +174,22 @@ console.log('jjjl',this.state.messages)
     }
 
     /* add a new message to the collection in firebase */
-    addMessage() {
-        //access last message in array
-        if (this.state.messages.length > 0) {
-            const index = this.state.messages.length - 2
+    addMessage(newMessage) {
+        //access new message
+        if (newMessage.length > 0) {
+           // const index = newMessage.length - 1
             //console.log('index', index);
-          //  console.log('message',this.state.messages)
+  console.log('newMessage in addMessage',newMessage)
 
             this.referenceMessages.add({
                 uid: (this.state.uid) ? this.state.uid : 0 ,
                 // giftedchat object format here
                 _id: uuidv4(),
-                text: (this.state.messages[index][0].text) ? this.state.messages[index][0].text : "no text",
-                createdAt: (this.state.messages[index].createdAt) ? this.state.messages[index][0].createdAt : "yesterday",
-                userId: (this.state.messages[index].user._id) ? this.state.messages[index][0].user._id : "0",
+                text: (newMessage[0].text) ? newMessage[0].text : "no text",
+                createdAt: (newMessage[0].createdAt) ? newMessage[0].createdAt : 'yesterday',
+                userId: (newMessage[0].user._id) ? newMessage[0].user._id : this.state.uid,
                 userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "",
-                userAvatar: (this.state.messages[index].user.avatar) ? this.state.messages[index][0].user.avatar : "",
+                userAvatar: (newMessage[0].user) ? newMessage[0].user.avatar : "",
             })
         }
     }
@@ -222,8 +222,11 @@ console.log('jjjl',this.state.messages)
                     messages = {this.state.messages}
                     onSend = {messages => this.onSend(messages)}
                     renderBubble = {this.renderBubble}
+                    createdAt = {new Date()}
                     user = {{
                         _id: this.state.uid,
+                        name: this.props.navigation.state.params.name,
+                        avatar: 'https://placeimg.com/140/140/any',
                     }}
                 />
                 }
