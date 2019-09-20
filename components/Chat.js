@@ -321,7 +321,7 @@ console.log('onCollectionUpdate messages:', messages)
     renderBubble(props) {
         let message = props.currentMessage;
         return (
-            < Bubble
+            <Bubble
                 { ...props }
                 wrapperStyle = {{
                     right: {
