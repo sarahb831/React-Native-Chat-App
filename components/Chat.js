@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import { StyleSheet, View, Platform } from 'react-native';
+import { AsyncStorage } from 'react-native';
+import NetInfo from  '@react-native-community/netinfo';
 
 // import firebase and firestore for messages database
 const firebase = require('firebase');
@@ -17,6 +19,7 @@ export default class Chat extends Component {
 
         this.state = {
             uid: 0,
+            isOnline: true, /* flag for online or offline */
             messages: [
             {
                 _id: 1,
@@ -31,30 +34,70 @@ export default class Chat extends Component {
 
             ],
         };
-        // if not set up yet, connect app to Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp({
-                apiKey: "AIzaSyA9WNG0eAwqQRKsqRTxheRY1pr1q4gnixo",
-                authDomain: "chat-ce808.firebaseapp.com",
-                databaseURL: "https://chat-ce808.firebaseio.com",
-                projectId: "chat-ce808",
-                storageBucket: "chat-ce808.appspot.com",
-                messagingSenderId: "387898719560",
-                appId: "1:387898719560:web:39da93792d94ecf1c1477d" 
-            });
-        }
-
-        // create reference to "messages" collection
-        this.referenceMessages = firebase.firestore().collection('messages');
-
         this.referenceMessagesUser = null;
-    };
+        this.referenceMessages = {};
+
+       
+// needed since can't setState in constructor so can't use eventListener
+/*        NetInfo.isConnected.fetch().then(isConnected => {
+            this.state = { isOnline: isConnected };
+            console.log('Online during constructor? ', this.state.isOnline);
+        })
+*/
+        
+    } // end constructor
 
     _isMounted = false;
 
+    /* get messages from storage, convert string to object and updates messages state
+    */
+    async getMessages() {
+        let messages = '';
+        try {
+            messages = await AsyncStorage.getItem('messages') || [];
+            this.setState({
+                messages: JSON.parse(messages)
+            });
+        } catch(error) {
+            console.log(error.message);
+        }
+    }
+
     async componentDidMount() {
+
+        // check for internet connection
+  /* changed to EventListener
+        NetInfo.isConnected.fetch().then(async isConnected => {
+            if (!isConnected) {
+                    console.log('offline');
+                    this.setState({ isOnline: false });
+            }   else { 
+                console.log('online');
+                this.setState({ isOnline: true });
+ */   
+
+        NetInfo.isConnected.fetch().then(isConnected => {
+            this.setState({ isOnline: isConnected });
+            console.log('Online during componentDidMount? ', isConnected);
+            console.log('this.state.isOnline in fetch:', this.state.isOnline);
+        })
+
+   /*
+  // use eventListener and unsubscribe function to monitor for network connectivity status
+        const unsubscribeNetInfo = NetInfo.addEventListener(state => {
+            if (state.isConnected) {
+                this.setState({ isOnline: true });
+            } else {
+                this.setState({ isOnline: false })
+            }
+           // this.setState({ isOnline: state.isConnected });
+            console.log("Online? ", state.isConnected);
+        
+            console.log('this.state.isOnline: ', this.state.isOnline);
+        })   
+*/
     /* set initial message on display */
-        this.setState({
+      /*  this.setState({
             messages: [
                 {
                     _id: 1,
@@ -80,7 +123,28 @@ export default class Chat extends Component {
                 }
             ],
         })
+*/
+console.log('before this.state.isOnline check')
+  if (this.state.isOnline === true) {
 
+    // moved from constructor
+        // if not set up yet, connect app to Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp({
+                apiKey: "AIzaSyA9WNG0eAwqQRKsqRTxheRY1pr1q4gnixo",
+                authDomain: "chat-ce808.firebaseapp.com",
+                databaseURL: "https://chat-ce808.firebaseio.com",
+                projectId: "chat-ce808",
+                storageBucket: "chat-ce808.appspot.com",
+                messagingSenderId: "387898719560",
+                appId: "1:387898719560:web:39da93792d94ecf1c1477d" 
+            });
+        }
+console.log('creating referenceMessages');
+        // create reference to "messages" collection
+        this.referenceMessages = firebase.firestore().collection('messages');
+    
+       
         // authenticate user anonymously with Firebase
         // auth() calls Firestore Auth service
         // onAuthStateChanged() is observer that is called whenever user's sign-in state changes,
@@ -105,20 +169,37 @@ export default class Chat extends Component {
 
         }
         );
+        }  else { // end if isOnline    
+            this.getMessages();
+        } 
         this._isMounted = true;
     }
 
     componentWillUnmount() {
-        if (this._isMounted) {
-            // stop listening to authentication changes
+/* readd if changed to listener
+        this.unsubscribeNetInfo(); 
+*/
+        if (this._isMounted && this.authUnsubscribe) {
+            // stop listening to authentication changes if it was started when online
             this.authUnsubscribe();
 
-            // stop listening to changes
+            // stop listening to changes to messages if it was started when online
             if (this.unsubscribeMessagesUser) {
                 this.unsubscribeMessagesUser();
             }
             this._isMounted = false;
         }
+    }
+
+    // to fix ordering of messages
+    compareTimes = (date1, date2) => {
+        if (date1.createdAt < date2.createdAt) {
+            return -1;
+        }
+        if (date1.createdAt > date2.createdAt) {
+            return 1;
+        }
+        return 0;
     }
 
     /* onSnapshot calls this function which retrieves current data from the messages   
@@ -134,10 +215,15 @@ export default class Chat extends Component {
         querySnapshot.forEach((doc) => {
             // get QueryDocumentSnapshot's database
             var data = doc.data();
+            var firebaseTime = data.createdAt;
+console.log('firebaseTime: ',firebaseTime,' from ',data.text)
+            // convert from Firebase Timestamp object to Date using milliseconds - surprise!
+            var timestamp = new Date(firebaseTime.seconds * 1000);
+console.log('timestamp in Date()', timestamp)
             messages.push({
                 _id: data._id,
                 text: data.text,
-                createdAt: data.createdAt,
+                createdAt: timestamp /*data.createdAt*/,
                 user: {
                     _id: data.userId,
                     name: data.userName,
@@ -145,25 +231,59 @@ export default class Chat extends Component {
                 }
             });
         });
+        // sort so latest is last
+        messages.sort(function (a,b) {
+            return b.createdAt - a.createdAt;
+        });
         // set messages state to be this array of messages
 //        this.setState(previousState => ({ messages: [...previousState.messages, messages]}));
-// try going back to this instead 9/18/19
+// try going back to this instead 9/18/19 since getting arrays inside arrays this way
         this.setState({ messages, });
-        console.log('onCollectionUpdate messages:', messages)
+console.log('onCollectionUpdate messages:', messages)
 
     }
 
-    /* append the newest message (when user presses 'send') to the 
-        messages object so that it can be displayed in the chat trail
+    /* save messages in asyncStorage with key name being the same as collection name
+        in Firebase
     */
-    onSend(newMessage) {
-        console.log('lkjfdl  newMessage:',newMessage)
+   async saveMessages() {
+       try {
+           await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+       } catch(error) {
+           console.log(error.message);
+       }
+    }    
+
+    /* delete messages from asyncStorage
+    */
+   async deleteMessages() {
+       try {
+           await AsyncStorage.removeItem('messages');
+       } catch(error) {
+           console.log(error.message);
+       }
+   }
+
+    /* append the newest message (when user presses 'send') to the 
+        messages object so that it can be displayed in the chat trail.
+        then use callback function in setState so that after state object
+        is updated its current state is saved into asyncStorage using 
+        saveMessages()
+    */
+    onSend(newMessage = []) {
+ //       console.log('newMessage: in onSend',newMessage)
         this.setState(previousState => ({
             messages: GiftedChat.append(previousState.messages,newMessage),
-        }))
+        }), () => {
+            this.saveMessages(); // to asyncStorage
+        })
     
-console.log('jjjl',this.state.messages)
-        this.addMessage(newMessage);
+//console.log('jjjl',this.state.messages)
+        try {
+            this.addMessage(newMessage);
+        } catch(error) {
+            console.log('Add to Firebase failed in onSend(): ',error.message);
+        }
     }
 
     // display name entered on Start screen in nav bar
@@ -179,9 +299,10 @@ console.log('jjjl',this.state.messages)
         if (newMessage.length > 0) {
            // const index = newMessage.length - 1
             //console.log('index', index);
-  console.log('newMessage in addMessage',newMessage)
+//  console.log('newMessage in addMessage',newMessage)
 
-            this.referenceMessages.add({
+            if (this.state.isOnline === true) {
+                this.referenceMessages.add({
                 uid: (this.state.uid) ? this.state.uid : 0 ,
                 // giftedchat object format here
                 _id: uuidv4(),
@@ -191,6 +312,7 @@ console.log('jjjl',this.state.messages)
                 userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "",
                 userAvatar: (newMessage[0].user) ? newMessage[0].user.avatar : "",
             })
+        }
         }
     }
 
@@ -213,6 +335,24 @@ console.log('jjjl',this.state.messages)
         )
     }
 
+    /* only display InputToolbar if device is online
+    */
+    renderInputToolbar(props) {
+/*        if (this.state.isOnline) {
+            if (this.state.isOnline === false) {
+            //don't render it
+            } else {
+*/
+                return (
+                    <InputToolbar
+                    {...props}
+                    />
+               );
+ /*           }
+        }
+*/
+    }
+
     render() {
         return (
             <View // background color is selected on Start screen
@@ -222,6 +362,7 @@ console.log('jjjl',this.state.messages)
                     messages = {this.state.messages}
                     onSend = {messages => this.onSend(messages)}
                     renderBubble = {this.renderBubble}
+                    renderInputToolbar = {this.renderInputToolbar}
                     createdAt = {new Date()}
                     user = {{
                         _id: this.state.uid,
