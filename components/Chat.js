@@ -14,16 +14,16 @@ import KeyboardSpacer from 'react-native-keyboard-spacer';
 // import console = require('console');
 
 export default class Chat extends Component {
+
     constructor(props) {
         super(props);
-
         this.state = {
             uid: 0,
             isOnline: true, /* flag for online or offline */
             messages: [
             {
                 _id: 1,
-                text: 'Please wait while messages are loaded...',
+                text: 'Welcome to the chat, '+ `${this.props.navigation.state.params.name}` + ',Please wait while messages are loaded...',
                 createdAt: new Date(),
                 user: {
                     _id: 2,
@@ -31,25 +31,14 @@ export default class Chat extends Component {
                     avatar: 'https://placeimg.com/140/140/any',
                 },
             },
-
             ],
         };
         this.referenceMessagesUser = null;
         this.referenceMessages = {};
-
-       
-// needed since can't setState in constructor so can't use eventListener
-/*        NetInfo.isConnected.fetch().then(isConnected => {
-            this.state = { isOnline: isConnected };
-            console.log('Online during constructor? ', this.state.isOnline);
-        })
-*/
-        
+        this._isMounted = false;
     } // end constructor
 
-    _isMounted = false;
-
-    /* get messages from storage, convert string to object and updates messages state
+    /* get messages from storage, convert string to object and update messages state
     */
     async getMessages() {
         let messages = '';
@@ -64,9 +53,8 @@ export default class Chat extends Component {
     }
 
     async componentDidMount() {
-
-        // check for internet connection
-  /* changed to EventListener
+      // check for internet connection
+/* changed to EventListener
         NetInfo.isConnected.fetch().then(async isConnected => {
             if (!isConnected) {
                     console.log('offline');
@@ -76,99 +64,56 @@ export default class Chat extends Component {
                 this.setState({ isOnline: true });
  */   
 
-        NetInfo.isConnected.fetch().then(isConnected => {
-            this.setState({ isOnline: isConnected });
-            console.log('Online during componentDidMount? ', isConnected);
-            console.log('this.state.isOnline in fetch:', this.state.isOnline);
-        })
-
-   /*
   // use eventListener and unsubscribe function to monitor for network connectivity status
         const unsubscribeNetInfo = NetInfo.addEventListener(state => {
-            if (state.isConnected) {
-                this.setState({ isOnline: true });
-            } else {
-                this.setState({ isOnline: false })
-            }
-           // this.setState({ isOnline: state.isConnected });
-            console.log("Online? ", state.isConnected);
-        
-            console.log('this.state.isOnline: ', this.state.isOnline);
+            this.setState({ isOnline: state.isConnected });
+// this.setState({ isOnline: false })            // need to change back to :state.isConnected          
+console.log('this.state.isOnline: ', this.state.isOnline);
         })   
-*/
-    /* set initial message on display */
-      /*  this.setState({
-            messages: [
-                {
-                    _id: 1,
-                    text: 'Hello to my favorite chatter!',
-                    createdAt: new Date(),
-                    user: {
-                        _id: 2,
-                        name: 'React Native',
-                        avatar: 'https://placeimg.com/140/140/any',
-                    },
-                },
-                {
-                    _id: 2,
-                    // include name entered on Start screen in message
-                    text: 'Welcome to the chat, ' + `${this.props.navigation.state.params.name}`,
-// is user info needed for system message ?
-                    user: {
-                        _id: '',
-                        name: this.props.navigation.state.params.name
-                    },
-                    createdAt: new Date(),
-                    system: true,
-                }
-            ],
-        })
-*/
-console.log('before this.state.isOnline check')
-  if (this.state.isOnline === true) {
+  
+        if (this.state.isOnline === true) {
+            // if not set up yet, connect app to Firebase
+            if (!firebase.apps.length) {
+                firebase.initializeApp({
+                    apiKey: "AIzaSyA9WNG0eAwqQRKsqRTxheRY1pr1q4gnixo",
+                    authDomain: "chat-ce808.firebaseapp.com",
+                    databaseURL: "https://chat-ce808.firebaseio.com",
+                    projectId: "chat-ce808",
+                    storageBucket: "chat-ce808.appspot.com",
+                    messagingSenderId: "387898719560",
+                    appId: "1:387898719560:web:39da93792d94ecf1c1477d" 
+                });
+            }
 
-    // moved from constructor
-        // if not set up yet, connect app to Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp({
-                apiKey: "AIzaSyA9WNG0eAwqQRKsqRTxheRY1pr1q4gnixo",
-                authDomain: "chat-ce808.firebaseapp.com",
-                databaseURL: "https://chat-ce808.firebaseio.com",
-                projectId: "chat-ce808",
-                storageBucket: "chat-ce808.appspot.com",
-                messagingSenderId: "387898719560",
-                appId: "1:387898719560:web:39da93792d94ecf1c1477d" 
-            });
-        }
-console.log('creating referenceMessages');
-        // create reference to "messages" collection
-        this.referenceMessages = firebase.firestore().collection('messages');
+            // create reference to "messages" collection
+            this.referenceMessages = firebase.firestore().collection('messages');
     
        
-        // authenticate user anonymously with Firebase
-        // auth() calls Firestore Auth service
-        // onAuthStateChanged() is observer that is called whenever user's sign-in state changes,
-        // it returns an unsubscribe() function which we name "authUnsubscribe" here 
-        // and provides a user object (we use uid from it)
-        this.authUnsubscribe = await firebase.auth().onAuthStateChanged(async (user) => {
-            // if new user or user name has changed
-            if (!user || (this.props.navigation.state.params.name !== user.name)) {
-                await firebase.auth().signInAnonymously();
+            // authenticate user anonymously with Firebase
+            // auth() calls Firestore Auth service
+            // onAuthStateChanged() is observer that is called whenever user's sign-in state changes,
+            // it returns an unsubscribe() function which we name "authUnsubscribe" here 
+            // and provides a user object (we use uid from it)
+            this.authUnsubscribe = await firebase.auth().onAuthStateChanged(async (user) => {
+                // if new user or user name has changed
+                if (!user || (this.props.navigation.state.params.name !== user.name)) {
+                    await firebase.auth().signInAnonymously();
+                }
+
+                // update user state with data for currently active user
+                this.setState({
+                    uid: user.uid
+                });
+
+                // create a reference to the active user's documents (messages) for this uid
+                this.referenceMessagesUser = await firebase.firestore().collection('messages').where("uid", "==", this.state.uid);
+            
+                // listen for collection changes for current user  (also returns 'unsubscribe() function')
+                // calls the onCollectionUpdate() function 
+                this.unsubscribeMessagesUser = await this.referenceMessagesUser.onSnapshot(this.onCollectionUpdate);
+
             }
-
-            // update user state with currently active user data
-            this.setState({
-                uid: user.uid
-            });
-
-            // create a reference to the active user's documents (messages) for this uid
-            this.referenceMessagesUser = await firebase.firestore().collection('messages').where("uid", "==", this.state.uid);
-            // listen for collection changes for current user  (also returns 'unsubscribe() function')
-            // calls the onCollectionUpdate() function 
-            this.unsubscribeMessagesUser = await this.referenceMessagesUser.onSnapshot(this.onCollectionUpdate);
-
-        }
-        );
+            );
         }  else { // end if isOnline    
             this.getMessages();
         } 
@@ -176,30 +121,19 @@ console.log('creating referenceMessages');
     }
 
     componentWillUnmount() {
-/* readd if changed to listener
-        this.unsubscribeNetInfo(); 
-*/
-        if (this._isMounted && this.authUnsubscribe) {
-            // stop listening to authentication changes if it was started when online
-            this.authUnsubscribe();
+        if (this._isMounted === true) {
+            this.unsubscribeNetInfo(); 
+            if (this.authUnsubscribe) {
+                // stop listening to authentication changes if it was started when online
+                this.authUnsubscribe();
 
-            // stop listening to changes to messages if it was started when online
-            if (this.unsubscribeMessagesUser) {
-                this.unsubscribeMessagesUser();
+                // stop listening to changes to messages if it was started when online
+                if (this.unsubscribeMessagesUser) {
+                    this.unsubscribeMessagesUser();
+                }
             }
             this._isMounted = false;
         }
-    }
-
-    // to fix ordering of messages
-    compareTimes = (date1, date2) => {
-        if (date1.createdAt < date2.createdAt) {
-            return -1;
-        }
-        if (date1.createdAt > date2.createdAt) {
-            return 1;
-        }
-        return 0;
     }
 
     /* onSnapshot calls this function which retrieves current data from the messages   
@@ -216,14 +150,12 @@ console.log('creating referenceMessages');
             // get QueryDocumentSnapshot's database
             var data = doc.data();
             var firebaseTime = data.createdAt;
-console.log('firebaseTime: ',firebaseTime,' from ',data.text)
             // convert from Firebase Timestamp object to Date using milliseconds - surprise!
             var timestamp = new Date(firebaseTime.seconds * 1000);
-console.log('timestamp in Date()', timestamp)
             messages.push({
                 _id: data._id,
                 text: data.text,
-                createdAt: timestamp /*data.createdAt*/,
+                createdAt: timestamp,
                 user: {
                     _id: data.userId,
                     name: data.userName,
@@ -236,33 +168,45 @@ console.log('timestamp in Date()', timestamp)
             return b.createdAt - a.createdAt;
         });
         // set messages state to be this array of messages
-//        this.setState(previousState => ({ messages: [...previousState.messages, messages]}));
-// try going back to this instead 9/18/19 since getting arrays inside arrays this way
         this.setState({ messages, });
 console.log('onCollectionUpdate messages:', messages)
 
     }
 
     /* save messages in asyncStorage with key name being the same as collection name
-        in Firebase
-    */
-   async saveMessages() {
-       try {
-           await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
-       } catch(error) {
-           console.log(error.message);
-       }
+        in Firebase */
+    async saveMessages() {
+        console.log('in saveMessages for asyncStorage')
+        try {
+            await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+        } catch(error) {
+            console.log(error.message);
+        }
+        let messages = '';
+        try {
+            messages = await AsyncStorage.getItem('messages') || [];   
+        } catch(error) {
+            console.log(error.message);
+        }
     }    
 
     /* delete messages from asyncStorage
     */
-   async deleteMessages() {
-       try {
+    async deleteMessages() {
+        try {
            await AsyncStorage.removeItem('messages');
-       } catch(error) {
+        } catch(error) {
            console.log(error.message);
-       }
-   }
+        }
+        // confirm that messages were deleted
+        let messages;
+        try {
+            messages = await AsyncStorage.getItem('messages') || [];  
+        } catch(error) {
+            console.log(error.message);
+        }
+    console.log('at end of deleteMessages, messages: ', messages)
+    }
 
     /* append the newest message (when user presses 'send') to the 
         messages object so that it can be displayed in the chat trail.
@@ -271,19 +215,19 @@ console.log('onCollectionUpdate messages:', messages)
         saveMessages()
     */
     onSend(newMessage = []) {
- //       console.log('newMessage: in onSend',newMessage)
         this.setState(previousState => ({
             messages: GiftedChat.append(previousState.messages,newMessage),
-        }), () => {
-            this.saveMessages(); // to asyncStorage
+            }), () => {
+                this.saveMessages(); // callback to asyncStorage saving
         })
     
-//console.log('jjjl',this.state.messages)
+        if (this.state.isOnline === true) {
         try {
             this.addMessage(newMessage);
         } catch(error) {
             console.log('Add to Firebase failed in onSend(): ',error.message);
         }
+    }
     }
 
     // display name entered on Start screen in nav bar
@@ -295,24 +239,19 @@ console.log('onCollectionUpdate messages:', messages)
 
     /* add a new message to the collection in firebase */
     addMessage(newMessage) {
-        //access new message
         if (newMessage.length > 0) {
-           // const index = newMessage.length - 1
-            //console.log('index', index);
-//  console.log('newMessage in addMessage',newMessage)
-
             if (this.state.isOnline === true) {
                 this.referenceMessages.add({
-                uid: (this.state.uid) ? this.state.uid : 0 ,
-                // giftedchat object format here
-                _id: uuidv4(),
-                text: (newMessage[0].text) ? newMessage[0].text : "no text",
-                createdAt: (newMessage[0].createdAt) ? newMessage[0].createdAt : 'yesterday',
-                userId: (newMessage[0].user._id) ? newMessage[0].user._id : this.state.uid,
-                userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "",
-                userAvatar: (newMessage[0].user) ? newMessage[0].user.avatar : "",
-            })
-        }
+                    uid: (this.state.uid) ? this.state.uid : 0 ,
+                    // giftedchat object format here
+                    _id: uuidv4(),
+                    text: (newMessage[0].text) ? newMessage[0].text : "no text",
+                    createdAt: (newMessage[0].createdAt) ? newMessage[0].createdAt : 'yesterday',
+                    userId: (newMessage[0].user._id) ? newMessage[0].user._id : this.state.uid,
+                    userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "",
+                    userAvatar: (newMessage[0].user) ? newMessage[0].user.avatar : "",
+                })
+            }
         }
     }
 
@@ -338,22 +277,26 @@ console.log('onCollectionUpdate messages:', messages)
     /* only display InputToolbar if device is online
     */
     renderInputToolbar(props) {
-/*        if (this.state.isOnline) {
-            if (this.state.isOnline === false) {
-            //don't render it
-            } else {
-*/
-                return (
-                    <InputToolbar
-                    {...props}
-                    />
-               );
- /*           }
-        }
-*/
-    }
 
+console.log('in renderInputTolbar this._isMounted:', this._isMounted)
+
+if (this.state !== null && this.state !== undefined) {console.log(this.state)}
+        if (this.state !== null && this.state !== undefined && this.state.isOnline == false) {
+ console.log('don"t render - this.state.isOnline:', this.state.isOnline)
+                // don't render the input toolbar
+        } else {
+            console.log('renderInputToolbar in else')
+            return (
+                <InputToolbar
+                    {...props}
+                />
+            );
+        }
+
+        } 
+  
     render() {
+console.log('isOnline in render:',this.state.isOnline)
         return (
             <View // background color is selected on Start screen
                 style={[styles.container, {backgroundColor: this.props.navigation.state.params.bColor}]}>
