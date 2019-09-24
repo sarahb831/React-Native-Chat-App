@@ -11,6 +11,7 @@ const uuidv4 = require('uuid/v4');
 
 // import keyboard spacer so Android keyboard doesn't hide message input field
 import KeyboardSpacer from 'react-native-keyboard-spacer';
+// import { DownloadResumable } from 'expo-file-system';
 // import console = require('console');
 
 export default class Chat extends Component {
@@ -35,6 +36,7 @@ export default class Chat extends Component {
         };
         this.referenceMessagesUser = null;
         this.referenceMessages = {};
+        this.unsubscribeNetInfo = null;
         this._isMounted = false;
     } // end constructor
 
@@ -54,21 +56,12 @@ export default class Chat extends Component {
 
     async componentDidMount() {
       // check for internet connection
-/* changed to EventListener
-        NetInfo.isConnected.fetch().then(async isConnected => {
-            if (!isConnected) {
-                    console.log('offline');
-                    this.setState({ isOnline: false });
-            }   else { 
-                console.log('online');
-                this.setState({ isOnline: true });
- */   
 
   // use eventListener and unsubscribe function to monitor for network connectivity status
-        const unsubscribeNetInfo = NetInfo.addEventListener(state => {
-            this.setState({ isOnline: state.isConnected });
-// this.setState({ isOnline: false })            // need to change back to :state.isConnected          
-console.log('this.state.isOnline: ', this.state.isOnline);
+        this.unsubscribeNetInfo = NetInfo.addEventListener(state => {
+            this.setState({ isOnline: state.isInternetReachable || false });
+            // this.setState({ isOnline: false })            // need to change back to :state.isConnected          
+            //console.log('this.state.isOnline is HARDCODED FALSE');
         })   
   
         if (this.state.isOnline === true) {
@@ -169,14 +162,11 @@ console.log('this.state.isOnline: ', this.state.isOnline);
         });
         // set messages state to be this array of messages
         this.setState({ messages, });
-console.log('onCollectionUpdate messages:', messages)
-
     }
 
     /* save messages in asyncStorage with key name being the same as collection name
         in Firebase */
     async saveMessages() {
-        console.log('in saveMessages for asyncStorage')
         try {
             await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
         } catch(error) {
@@ -205,7 +195,6 @@ console.log('onCollectionUpdate messages:', messages)
         } catch(error) {
             console.log(error.message);
         }
-    console.log('at end of deleteMessages, messages: ', messages)
     }
 
     /* append the newest message (when user presses 'send') to the 
@@ -276,16 +265,11 @@ console.log('onCollectionUpdate messages:', messages)
 
     /* only display InputToolbar if device is online
     */
-    renderInputToolbar(props) {
-
-console.log('in renderInputTolbar this._isMounted:', this._isMounted)
-
-if (this.state !== null && this.state !== undefined) {console.log(this.state)}
-        if (this.state !== null && this.state !== undefined && this.state.isOnline == false) {
- console.log('don"t render - this.state.isOnline:', this.state.isOnline)
-                // don't render the input toolbar
+    renderInputToolbar(props) { // works with isOnline passed as props, woohoo
+        let isOnline = props.isOnline;
+        if (isOnline === false) {
+            // don't display input toolbar
         } else {
-            console.log('renderInputToolbar in else')
             return (
                 <InputToolbar
                     {...props}
@@ -293,10 +277,9 @@ if (this.state !== null && this.state !== undefined) {console.log(this.state)}
             );
         }
 
-        } 
+    } 
   
     render() {
-console.log('isOnline in render:',this.state.isOnline)
         return (
             <View // background color is selected on Start screen
                 style={[styles.container, {backgroundColor: this.props.navigation.state.params.bColor}]}>
@@ -305,6 +288,7 @@ console.log('isOnline in render:',this.state.isOnline)
                     messages = {this.state.messages}
                     onSend = {messages => this.onSend(messages)}
                     renderBubble = {this.renderBubble}
+                    isOnline = {this.state.isOnline}
                     renderInputToolbar = {this.renderInputToolbar}
                     createdAt = {new Date()}
                     user = {{
