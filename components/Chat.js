@@ -290,6 +290,7 @@ export default class Chat extends Component {
                     renderBubble = {this.renderBubble}
                     isOnline = {this.state.isOnline}
                     renderInputToolbar = {this.renderInputToolbar}
+                    renderActions = {this.renderCustomActions}
                     createdAt = {new Date()}
                     user = {{
                         _id: this.state.uid,
