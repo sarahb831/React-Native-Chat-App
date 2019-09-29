@@ -279,6 +279,13 @@ export default class Chat extends Component {
 
     } 
   
+    /* renders component for customer actions (camera, 
+    camera_roll, location)
+    */
+   renderCustomActions = (props) => {
+    return <CustomActions {...props} />
+  }
+
     render() {
         return (
             <View // background color is selected on Start screen
@@ -290,7 +297,7 @@ export default class Chat extends Component {
                     renderBubble = {this.renderBubble}
                     isOnline = {this.state.isOnline}
                     renderInputToolbar = {this.renderInputToolbar}
-                    renderActions = {this.renderCustomActions}
+                    renderActions = {this.screenProps.renderCustomActions}
                     createdAt = {new Date()}
                     user = {{
                         _id: this.state.uid,

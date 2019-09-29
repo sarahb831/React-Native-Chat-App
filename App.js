@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 // import the screens
 import Start from './components/Start';
 import Chat from './components/Chat';
+import CustomActions from './components/CustomActions';
 
 // import React Navigation
 import { createStackNavigator, createAppContainer } from 'react-navigation';
@@ -25,9 +26,18 @@ class App extends Component {
     super(props);
   }
 
+  /* renders component for customer actions (camera, 
+    camera_roll, location)
+    */
+   renderCustomActions = (props) => {
+     return <CustomActions {...props} />
+   }
+
   render(){
     return (
-      < NavigatorContainer />
+      <NavigatorContainer screenProps ={{
+        renderCustomActions : this.renderCustomActions
+      }} />
     )
   }
 }

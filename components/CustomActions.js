@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 
 export default class CustomActions extends Component {
 
