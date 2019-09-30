@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import { StyleSheet, View, Platform } from 'react-native';
 import { AsyncStorage } from 'react-native';
-import { MapView } from  'expo';
+import MapView from 'react-native-maps';
 
 import NetInfo from  '@react-native-community/netinfo';
 
@@ -337,17 +337,18 @@ then open the connection and retrieve the URI's data (the image) with GET
         const { currentMessage } = props;
         if (currentMessage.location) {
             console.log('currentMessage.location:', currentMessage.location)
-/*            return(
+            return(
               <MapView
                     style={{width:300, height: 200}}
                     region={{
                         latitude: currentMessage.location.coords.latitude,
                         longitude: currentMessage.location.coords.longitude,
                         latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0922,
                     }}
                 />
-            );
-  */        
+          );
+        
         }
         return null;
     }
