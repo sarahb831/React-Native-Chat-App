@@ -5,13 +5,14 @@ import Start from './components/Start';
 import Chat from './components/Chat';
 import CustomActions from './components/CustomActions';
 
+
 // import React Navigation
 import { createStackNavigator, createAppContainer } from 'react-navigation';
 
 //create navigator for mapping to these screens
 const navigator = createStackNavigator({
   Start: {screen: Start},
-  Chat: {screen: Chat}
+  Chat: {screen: Chat} 
 });
 
 // create app container to manage app state and link main nav to app environment

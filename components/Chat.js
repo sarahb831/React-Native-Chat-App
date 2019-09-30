@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import { StyleSheet, View, Platform } from 'react-native';
 import { AsyncStorage } from 'react-native';
+import { MapView } from  'expo';
+
 import NetInfo from  '@react-native-community/netinfo';
 
 // import firebase and firestore for messages database
@@ -11,8 +13,8 @@ const uuidv4 = require('uuid/v4');
 
 // import keyboard spacer so Android keyboard doesn't hide message input field
 import KeyboardSpacer from 'react-native-keyboard-spacer';
-// import { DownloadResumable } from 'expo-file-system';
-// import console = require('console');
+
+import CustomActions from './CustomActions';
 
 export default class Chat extends Component {
 
@@ -31,6 +33,8 @@ export default class Chat extends Component {
                     name: 'React Native',
                     avatar: 'https://placeimg.com/140/140/any',
                 },
+                image: null,
+                location: null,
             },
             ],
         };
@@ -204,14 +208,27 @@ export default class Chat extends Component {
         saveMessages()
     */
     onSend(newMessage = []) {
+        if (this.state.isOnline === true && newMessage.image) {
+            try {
+            // if an image and online, convert to blob, upload to Google Storage, and 
+            // store Storage URL in message object
+                storageUrl = this.uploadImage(newMessage.image);
+                newMessage.image = storageUrl;
+            } catch(error) {
+                console.log('Add to Firebase Storage failed');
+            }
+           
+        }
         this.setState(previousState => ({
             messages: GiftedChat.append(previousState.messages,newMessage),
             }), () => {
                 this.saveMessages(); // callback to asyncStorage saving
         })
+        console.log('onSend message:', newMessage)
     
         if (this.state.isOnline === true) {
         try {
+            
             this.addMessage(newMessage);
         } catch(error) {
             console.log('Add to Firebase failed in onSend(): ',error.message);
@@ -225,20 +242,53 @@ export default class Chat extends Component {
             title: navigation.getParam('name'),
         };
     }
+/* upload image to Google Storage
+*/
+/* convert file into blob for Google Cloud Storage: 
+    create a new XMLHttpRequest and set its responseType to 'blob',
+then open the connection and retrieve the URI's data (the image) with GET
+*/
+    uploadImage = async(uri) => {
+        const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+                resolve(xhr.response);
+            };
+            xhr.onerror = function(e) {
+                console.log(e);
+                reject(new TypeError('Network request failed'));
+            };
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+        });
+
+        /* create a reference to a file you want to operate on.  "storage" 
+        is the Google Storage parent container for all our files there.
+        */
+        const ref = firebase.storage().ref().child('myimage');
+        const snapshot = await ref.put(blob);
+
+        blob.close();
+
+        return await snapshot.ref.getDownloadURL();
+    };
 
     /* add a new message to the collection in firebase */
     addMessage(newMessage) {
         if (newMessage.length > 0) {
             if (this.state.isOnline === true) {
+                
                 this.referenceMessages.add({
                     uid: (this.state.uid) ? this.state.uid : 0 ,
                     // giftedchat object format here
                     _id: uuidv4(),
-                    text: (newMessage[0].text) ? newMessage[0].text : "no text",
+                    text: (newMessage[0].text) ? newMessage[0].text : "",
                     createdAt: (newMessage[0].createdAt) ? newMessage[0].createdAt : 'yesterday',
                     userId: (newMessage[0].user._id) ? newMessage[0].user._id : this.state.uid,
                     userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "",
                     userAvatar: (newMessage[0].user) ? newMessage[0].user.avatar : "",
+                    image: (newMessage[0].image) ? newMessage[0].image : null
                 })
             }
         }
@@ -255,9 +305,6 @@ export default class Chat extends Component {
                     right: {
                         backgroundColor: 'lightblue'
                     },
-                    left: {
-                        backgroundColor: 'darkblue'
-                    }
                 }}
             />
         )
@@ -286,6 +333,25 @@ export default class Chat extends Component {
     return <CustomActions {...props} />
   }
 
+    renderCustomView = (props) => {
+        const { currentMessage } = props;
+        if (currentMessage.location) {
+            console.log('currentMessage.location:', currentMessage.location)
+/*            return(
+              <MapView
+                    style={{width:300, height: 200}}
+                    region={{
+                        latitude: currentMessage.location.coords.latitude,
+                        longitude: currentMessage.location.coords.longitude,
+                        latitudeDelta: 0.0922,
+                    }}
+                />
+            );
+  */        
+        }
+        return null;
+    }
+
     render() {
         return (
             <View // background color is selected on Start screen
@@ -297,7 +363,8 @@ export default class Chat extends Component {
                     renderBubble = {this.renderBubble}
                     isOnline = {this.state.isOnline}
                     renderInputToolbar = {this.renderInputToolbar}
-                    renderActions = {this.screenProps.renderCustomActions}
+                    renderActions = {this.renderCustomActions}
+                    renderCustomView = {this.renderCustomView}
                     createdAt = {new Date()}
                     user = {{
                         _id: this.state.uid,
@@ -313,7 +380,13 @@ export default class Chat extends Component {
 }
 
 const styles = StyleSheet.create({
-container: {
-flex: 1,
-},
+    container: {
+        flex: 1,    
+    },
+    mapView: {
+        width: 150,
+        height: 100,
+        borderRadius: 13,
+        margin: 3
+    },
 });
