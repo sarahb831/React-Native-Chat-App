@@ -103,7 +103,7 @@ export default class Chat extends Component {
                 });
 
                 // create a reference to the active user's documents (messages) for this uid
-                this.referenceMessagesUser = await firebase.firestore().collection('messages').where("uid", "==", this.state.uid);
+                this.referenceMessagesUser = await firebase.firestore().collection('messages') .where("uid", "==", this.state.uid);
             
                 // listen for collection changes for current user  (also returns 'unsubscribe() function')
                 // calls the onCollectionUpdate() function 
@@ -152,6 +152,8 @@ export default class Chat extends Component {
             messages.push({
                 _id: data._id,
                 text: data.text,
+                image: data.image, // added since new to task 5.6
+                location: data.location, // added since new to task 5.6
                 createdAt: timestamp,
                 user: {
                     _id: data.userId,
@@ -207,13 +209,14 @@ export default class Chat extends Component {
         is updated its current state is saved into asyncStorage using 
         saveMessages()
     */
-    onSend(newMessage = []) {
-        if (this.state.isOnline === true && newMessage.image) {
+    async onSend(newMessage = []) {  // async since from firebase
+        if (this.state.isOnline === true && newMessage[0].image) {  // index of 0 from array
             try {
-            // if an image and online, convert to blob, upload to Google Storage, and 
+            // if an image exists and and app is online, convert to blob, 
+            // upload to Google Storage, and 
             // store Storage URL in message object
-                storageUrl = this.uploadImage(newMessage.image);
-                newMessage.image = storageUrl;
+                storageUrl = await this.uploadImage(newMessage[0].image);
+                newMessage[0].image = storageUrl;
             } catch(error) {
                 console.log('Add to Firebase Storage failed');
             }
@@ -288,7 +291,8 @@ then open the connection and retrieve the URI's data (the image) with GET
                     userId: (newMessage[0].user._id) ? newMessage[0].user._id : this.state.uid,
                     userName: (this.props.navigation.state.params.name) ?this.props.navigation.state.params.name: "",
                     userAvatar: (newMessage[0].user) ? newMessage[0].user.avatar : "",
-                    image: (newMessage[0].image) ? newMessage[0].image : null
+                    image: (newMessage[0].image) ? newMessage[0].image : null,
+                    location: (newMessage[0].location) ? newMessage[0].location : "",
                 })
             }
         }

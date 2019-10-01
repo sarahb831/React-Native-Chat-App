@@ -114,8 +114,9 @@ export default class CustomActions extends Component {
                         +
                     </Text>
                 </View>       
-                {this.state.image && <Image source={{uri: this.state.image.uri}}
+              {/*  {this.state.image && <Image source={{uri: this.state.image.uri}}
             style={{width: 200, height:200 }} />}
+                    */}
             </TouchableOpacity>
         )
     }
