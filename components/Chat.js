@@ -59,9 +59,9 @@ export default class Chat extends Component {
     }
 
     async componentDidMount() {
-      // check for internet connection
+        // check for internet connection
 
-  // use eventListener and unsubscribe function to monitor for network connectivity status
+        // use eventListener and unsubscribe function to monitor for network connectivity status
         this.unsubscribeNetInfo = NetInfo.addEventListener(state => {
             this.setState({ isOnline: state.isInternetReachable || false });
             // this.setState({ isOnline: false })            // need to change back to :state.isConnected          
@@ -227,11 +227,9 @@ export default class Chat extends Component {
             }), () => {
                 this.saveMessages(); // callback to asyncStorage saving
         })
-        console.log('onSend message:', newMessage)
     
         if (this.state.isOnline === true) {
-        try {
-            
+        try {   
             this.addMessage(newMessage);
         } catch(error) {
             console.log('Add to Firebase failed in onSend(): ',error.message);

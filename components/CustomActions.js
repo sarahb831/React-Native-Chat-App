@@ -14,7 +14,6 @@ export default class CustomActions extends Component {
     /* get permission to access CAMERA_ROLL and let user pick a picture, then update state with it
     */
     pickImage = async() => {
-        console.log('in pickImage');
         const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
         if (status === 'granted') {
             let result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'Images',
@@ -24,7 +23,6 @@ export default class CustomActions extends Component {
                 this.setState({
                     image: result
                 });
-                console.log('image set', this.state.image)
                 this.props.onSend([{ image: result.uri }]);
                 return result.uri;
                 }        
@@ -34,40 +32,34 @@ export default class CustomActions extends Component {
     /* get permission to access camera and let user take a picture
     */
    takePhoto = async() => {
-    console.log('in takePhoto');
-    const { status } = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
-    if (status === 'granted') {
-        let result = await ImagePicker.launchCameraAsync().catch(error=>console.log(error));
-        
-        if (!result.cancelled) {
-            this.setState({
-                image: result
-            });
-            console.log('picture taken and image set', this.state.image)
-            this.props.onSend([{ image: result.uri }]);
-            return result.uri;
+        const { status } = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
+        if (status === 'granted') {
+            let result = await ImagePicker.launchCameraAsync().catch(error=>console.log(error));
+            if (!result.cancelled) {
+                this.setState({
+                    image: result
+                });
+                this.props.onSend([{ image: result.uri }]);
+                return result.uri;
             }        
-    }
-};
+        }
+    };
 
     /* get permission to access user's location and add location details to message
     */
-   getLocation = async() => {
-    console.log('in getLocation()');
-    const { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status === 'granted') {
-        let result = await Location.getCurrentPositionAsync({}).catch(error=>console.log(error));
-        
-        if (!result.cancelled) {
-            this.setState({
-                location: result
-            });
-            console.log('location given', this.state.location)
-            this.props.onSend([{ location: result }]);
-            return result;
+    getLocation = async() => {
+        const { status } = await Permissions.askAsync(Permissions.LOCATION);
+        if (status === 'granted') {
+            let result = await Location.getCurrentPositionAsync({}).catch(error=>console.log(error));
+            if (!result.cancelled) {
+                this.setState({
+                    location: result
+                });
+                this.props.onSend([{ location: result }]);
+                return result;
             }        
-    }
-};
+        }
+    };
 
 
     onActionPress = () => {
@@ -81,15 +73,12 @@ export default class CustomActions extends Component {
             async (buttonIndex) => {
                 switch(buttonIndex) {
                     case 0:
-                        console.log('user wants to pick an image, calling pickimage');
                         this.pickImage();
                         return;
                     case 1:
-                        console.log('user wants to take a photo');
                         this.takePhoto();
                         return;
                     case 2:
-                        console.log('user want to get their location');
                         this.getLocation();
                         return;
                         
@@ -113,10 +102,7 @@ export default class CustomActions extends Component {
                         this.props.iconTextStyle]}>
                         +
                     </Text>
-                </View>       
-              {/*  {this.state.image && <Image source={{uri: this.state.image.uri}}
-            style={{width: 200, height:200 }} />}
-                    */}
+                </View> 
             </TouchableOpacity>
         )
     }

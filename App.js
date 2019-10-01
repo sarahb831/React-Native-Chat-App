@@ -27,18 +27,9 @@ class App extends Component {
     super(props);
   }
 
-  /* renders component for customer actions (camera, 
-    camera_roll, location)
-    */
-   renderCustomActions = (props) => {
-     return <CustomActions {...props} />
-   }
-
   render(){
     return (
-      <NavigatorContainer screenProps ={{
-        renderCustomActions : this.renderCustomActions
-      }} />
+      <NavigatorContainer />
     )
   }
 }
