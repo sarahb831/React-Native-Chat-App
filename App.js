@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 // import the screens
 import Start from './components/Start';
 import Chat from './components/Chat';
-import CustomActions from './components/CustomActions';
-
 
 // import React Navigation
 import { createStackNavigator, createAppContainer } from 'react-navigation';
