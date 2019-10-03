@@ -14,50 +14,62 @@ export default class CustomActions extends Component {
     /* get permission to access CAMERA_ROLL and let user pick a picture, then update state with it
     */
     pickImage = async() => {
-        const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-        if (status === 'granted') {
-            let result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'Images',
-            }).catch(error=>console.log(error));
+        try {
+            const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+            if (status === 'granted') {
+                let result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'Images',
+                }).catch(error=>console.log(error));
             
-            if (!result.cancelled) {
-                this.setState({
-                    image: result
-                });
-                this.props.onSend([{ image: result.uri }]);
-                return result.uri;
+                if (!result.cancelled) {
+                    this.setState({
+                        image: result
+                    });
+                    this.props.onSend([{ image: result.uri }]);
+                    return result.uri;
                 }        
+            }
+        } catch(error) { 
+            console.log(error);
         }
     };
 
     /* get permission to access camera and let user take a picture
     */
    takePhoto = async() => {
-        const { status } = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
-        if (status === 'granted') {
-            let result = await ImagePicker.launchCameraAsync().catch(error=>console.log(error));
-            if (!result.cancelled) {
-                this.setState({
-                    image: result
-                });
-                this.props.onSend([{ image: result.uri }]);
-                return result.uri;
-            }        
+       try {
+            const { status } = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
+            if (status === 'granted') {
+                let result = await ImagePicker.launchCameraAsync().catch(error=>console.log(error));
+                if (!result.cancelled) {
+                    this.setState({
+                        image: result
+                    });
+                    this.props.onSend([{ image: result.uri }]);
+                    return result.uri;
+                }        
+            }
+        } catch(error) {
+            console.log(error);
         }
     };
 
     /* get permission to access user's location and add location details to message
     */
     getLocation = async() => {
-        const { status } = await Permissions.askAsync(Permissions.LOCATION);
-        if (status === 'granted') {
-            let result = await Location.getCurrentPositionAsync({}).catch(error=>console.log(error));
-            if (!result.cancelled) {
-                this.setState({
-                    location: result
-                });
-                this.props.onSend([{ location: result }]);
-                return result;
-            }        
+        try {
+            const { status } = await Permissions.askAsync(Permissions.LOCATION);
+            if (status === 'granted') {
+                let result = await Location.getCurrentPositionAsync({}).catch(error=>console.log(error));
+                if (!result.cancelled) {
+                    this.setState({
+                        location: result
+                    });
+                    this.props.onSend([{ location: result }]); // add location to message
+                    return result;
+                }        
+            }
+        } catch(error) {
+            console.log(error);
         }
     };
 
@@ -71,18 +83,22 @@ export default class CustomActions extends Component {
                 cancelButtonIndex,
             },
             async (buttonIndex) => {
-                switch(buttonIndex) {
-                    case 0:
-                        this.pickImage();
-                        return;
-                    case 1:
-                        this.takePhoto();
-                        return;
-                    case 2:
-                        this.getLocation();
-                        return;
+                try {
+                    switch(buttonIndex) {
+                        case 0:
+                            this.pickImage();
+                            return;
+                        case 1:
+                            this.takePhoto();
+                            return;
+                        case 2:
+                            this.getLocation();
+                            return;
                         
-                    default:
+                        default:
+                    }
+                } catch(error) {
+                    console.log(error);
                 }
             },
         );

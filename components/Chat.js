@@ -3,11 +3,10 @@ import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import { StyleSheet, View, Platform } from 'react-native';
 import { AsyncStorage } from 'react-native';
 import MapView from 'react-native-maps';
-
 import NetInfo from  '@react-native-community/netinfo';
 
 // import firebase and firestore for messages database
-const firebase = require('firebase');
+const firebase = require('firebase'); // using require since backend node.js
 require('firebase/firestore');
 const uuidv4 = require('uuid/v4');
 
@@ -15,6 +14,7 @@ const uuidv4 = require('uuid/v4');
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 
 import CustomActions from './CustomActions';
+
 
 export default class Chat extends Component {
 
@@ -59,62 +59,63 @@ export default class Chat extends Component {
     }
 
     async componentDidMount() {
-        // check for internet connection
-
-        // use eventListener and unsubscribe function to monitor for network connectivity status
-        this.unsubscribeNetInfo = NetInfo.addEventListener(state => {
-            this.setState({ isOnline: state.isInternetReachable || false });
-            // this.setState({ isOnline: false })            // need to change back to :state.isConnected          
-            //console.log('this.state.isOnline is HARDCODED FALSE');
-        })   
+        try {
+            // use eventListener and unsubscribe function to monitor for network connectivity status
+            this.unsubscribeNetInfo = NetInfo.addEventListener(state => {
+                this.setState({ isOnline: state.isInternetReachable || false });
+                // this.setState({ isOnline: false })            // need to change back to :state.isConnected          
+                //console.log('this.state.isOnline is HARDCODED FALSE');
+            })   
   
-        if (this.state.isOnline === true) {
-            // if not set up yet, connect app to Firebase
-            if (!firebase.apps.length) {
-                firebase.initializeApp({
-                    apiKey: "AIzaSyA9WNG0eAwqQRKsqRTxheRY1pr1q4gnixo",
-                    authDomain: "chat-ce808.firebaseapp.com",
-                    databaseURL: "https://chat-ce808.firebaseio.com",
-                    projectId: "chat-ce808",
-                    storageBucket: "chat-ce808.appspot.com",
-                    messagingSenderId: "387898719560",
-                    appId: "1:387898719560:web:39da93792d94ecf1c1477d" 
-                });
-            }
-
-            // create reference to "messages" collection
-            this.referenceMessages = firebase.firestore().collection('messages');
-    
-       
-            // authenticate user anonymously with Firebase
-            // auth() calls Firestore Auth service
-            // onAuthStateChanged() is observer that is called whenever user's sign-in state changes,
-            // it returns an unsubscribe() function which we name "authUnsubscribe" here 
-            // and provides a user object (we use uid from it)
-            this.authUnsubscribe = await firebase.auth().onAuthStateChanged(async (user) => {
-                // if new user or user name has changed
-                if (!user || (this.props.navigation.state.params.name !== user.name)) {
-                    await firebase.auth().signInAnonymously();
+            if (this.state.isOnline === true) {
+                // if not set up yet, connect app to Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp({
+                        apiKey: "AIzaSyA9WNG0eAwqQRKsqRTxheRY1pr1q4gnixo",
+                        authDomain: "chat-ce808.firebaseapp.com",
+                        databaseURL: "https://chat-ce808.firebaseio.com",
+                        projectId: "chat-ce808",
+                        storageBucket: "chat-ce808.appspot.com",
+                        messagingSenderId: "387898719560",
+                        appId: "1:387898719560:web:39da93792d94ecf1c1477d" 
+                    });
                 }
 
-                // update user state with data for currently active user
-                this.setState({
-                    uid: user.uid
-                });
+                // create reference to "messages" collection
+                this.referenceMessages = firebase.firestore().collection('messages');
+    
+       
+                // authenticate user anonymously with Firebase
+                // auth() calls Firestore Auth service
+                // onAuthStateChanged() is observer that is called whenever user's sign-in state changes,
+                // it returns an unsubscribe() function which we name "authUnsubscribe" here 
+                // and provides a user object (we use uid from it)
+                this.authUnsubscribe = await firebase.auth().onAuthStateChanged(async (user) => {
+                    // if new user or user name has changed
+                    if (!user || (this.props.navigation.state.params.name !== user.name)) {
+                        await firebase.auth().signInAnonymously();
+                    }
 
-                // create a reference to the active user's documents (messages) for this uid
-                this.referenceMessagesUser = await firebase.firestore().collection('messages') .where("uid", "==", this.state.uid);
+                    // update user state with data for currently active user
+                    this.setState({
+                        uid: user.uid
+                    });
+
+                    // create a reference to the active user's documents (messages) for this uid
+                    this.referenceMessagesUser = await firebase.firestore().collection('messages') .where("uid", "==", this.state.uid);
             
-                // listen for collection changes for current user  (also returns 'unsubscribe() function')
-                // calls the onCollectionUpdate() function 
-                this.unsubscribeMessagesUser = await this.referenceMessagesUser.onSnapshot(this.onCollectionUpdate);
-
-            }
-            );
-        }  else { // end if isOnline    
-            this.getMessages();
-        } 
-        this._isMounted = true;
+                    // listen for collection changes for current user  (also returns 'unsubscribe() function')
+                    // calls the onCollectionUpdate() function 
+                    this.unsubscribeMessagesUser = await this.referenceMessagesUser.onSnapshot(this.onCollectionUpdate);
+                }
+                );
+            }  else { // end "if isOnline"    
+                this.getMessages();
+            } 
+            this._isMounted = true;
+        } catch(error) {
+            console.log(error);
+        }
     }
 
     componentWillUnmount() {
@@ -145,10 +146,10 @@ export default class Chat extends Component {
         // go through each document
         querySnapshot.forEach((doc) => {
             // get QueryDocumentSnapshot's database
-            var data = doc.data();
-            var firebaseTime = data.createdAt;
+            let data = doc.data();
+            let firebaseTime = data.createdAt;
             // convert from Firebase Timestamp object to Date using milliseconds - surprise!
-            var timestamp = new Date(firebaseTime.seconds * 1000);
+            let timestamp = new Date(firebaseTime.seconds * 1000);
             messages.push({
                 _id: data._id,
                 text: data.text,
@@ -212,13 +213,13 @@ export default class Chat extends Component {
     async onSend(newMessage = []) {  // async since from firebase
         if (this.state.isOnline === true && newMessage[0].image) {  // index of 0 from array
             try {
-            // if an image exists and and app is online, convert to blob, 
-            // upload to Google Storage, and 
-            // store Storage URL in message object
+                // if an image exists and and app is online, convert to blob, 
+                // upload to Google Storage, and 
+                // store Storage URL in message object
                 storageUrl = await this.uploadImage(newMessage[0].image);
                 newMessage[0].image = storageUrl;
             } catch(error) {
-                console.log('Add to Firebase Storage failed');
+                console.log('Add to Firebase Storage failed: ', error);
             }
            
         }
@@ -229,12 +230,12 @@ export default class Chat extends Component {
         })
     
         if (this.state.isOnline === true) {
-        try {   
-            this.addMessage(newMessage);
-        } catch(error) {
-            console.log('Add to Firebase failed in onSend(): ',error.message);
+            try {   
+                this.addMessage(newMessage);
+            } catch(error) {
+                console.log('Add to Firebase failed in onSend(): ',error.message);
+            }
         }
-    }
     }
 
     // display name entered on Start screen in nav bar
@@ -243,6 +244,7 @@ export default class Chat extends Component {
             title: navigation.getParam('name'),
         };
     }
+
 /* upload image to Google Storage
 */
 /* convert file into blob for Google Cloud Storage: 
@@ -250,29 +252,33 @@ export default class Chat extends Component {
 then open the connection and retrieve the URI's data (the image) with GET
 */
     uploadImage = async(uri) => {
-        const blob = await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.onload = function() {
-                resolve(xhr.response);
-            };
-            xhr.onerror = function(e) {
-                console.log(e);
-                reject(new TypeError('Network request failed'));
-            };
-            xhr.responseType = 'blob';
-            xhr.open('GET', uri, true);
-            xhr.send(null);
-        });
+        try {
+            const blob = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.onload = () => {
+                    resolve(xhr.response);
+                };
+                xhr.onerror = (e) => {
+                    console.log(e);
+                    reject(new TypeError('Network request failed'));
+                };
+                xhr.responseType = 'blob';
+                xhr.open('GET', uri, true);
+                xhr.send(null);
+            });
 
-        /* create a reference to a file you want to operate on.  "storage" 
-        is the Google Storage parent container for all our files there.
-        */
-        const ref = firebase.storage().ref().child('myimage');
-        const snapshot = await ref.put(blob);
+            /* create a reference to a file you want to operate on.  "storage" 
+            is the Google Storage parent container for all our files there.
+            */
+            const ref = firebase.storage().ref().child('myimage');
+            const snapshot = await ref.put(blob);
 
-        blob.close();
+            blob.close();
 
-        return await snapshot.ref.getDownloadURL();
+            return await snapshot.ref.getDownloadURL();
+        } catch(error) {
+            console.log(error);
+        }
     };
 
     /* add a new message to the collection in firebase */
@@ -338,7 +344,6 @@ then open the connection and retrieve the URI's data (the image) with GET
     renderCustomView = (props) => {
         const { currentMessage } = props;
         if (currentMessage.location) {
-            console.log('currentMessage.location:', currentMessage.location)
             return(
               <MapView
                     style={{width:300, height: 200}}
