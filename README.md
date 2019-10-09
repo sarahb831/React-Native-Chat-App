@@ -26,4 +26,4 @@ you to open the project in Expo.
 
 ### Database Configuration
 
-This project uses Google Firebase/Firestore as the database for messages, in project "chat-ce808"
+This project uses Google Firebase/Firestore as the database for messages, in project __chat-ce808__
