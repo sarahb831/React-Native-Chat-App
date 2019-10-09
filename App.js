@@ -1,3 +1,27 @@
+/**
+ * 
+ * This project uses the React Native framework, GiftedChat library, and 
+ * Firestore/Firebase to create a chat application which allows a user to
+ * select a background color, sign up, create and receive messages, take
+ * or select a picture and send it, and send their location to others in
+ * the chat.
+ * 
+ * App.js sets up the navigation for moving between the Start screen and 
+ * Chat screen.
+ * 
+ * Start.js contains the Start class, which allows the user to enter their user name and select a background
+ * color.
+ * 
+ * Chat.js contains the Chat class, which handles all of the chat screen functions except where it calls
+ * those from CustomActions.js.
+ * 
+ * CustomActions.js contains the CustomActions class, handles the pop-up menu and associated actions for
+ * selecting an image to send, taking a picture to send, sending the user's
+ * location, or cancelling the pop-up menu.
+ * 
+ * 
+ */
+
 import React, { Component } from 'react';
 
 // import the screens

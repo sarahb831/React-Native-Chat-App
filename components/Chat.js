@@ -1,3 +1,10 @@
+/**
+ * 
+ * Chat.js contains the Chat class, which handles all of the chat screen functions except where it calls
+ * those from CustomActions.js.
+ * 
+ * 
+ */
 import React, { Component } from 'react';
 import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import { StyleSheet, View, Platform } from 'react-native';

@@ -11,6 +11,8 @@
     "@react-native-community/netinfo": "^4.2.1",
     "expo": "^34.0.1",
     "firebase": "^6.5.0",
+    "global": "^4.4.0",
+    "jsdoc": "^3.6.3",
     "react": "16.8.3",
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-34.0.0.tar.gz",
@@ -24,7 +26,8 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "babel-preset-expo": "^6.0.0"
+    "babel-preset-expo": "^6.0.0",
+    "eslint": "^6.5.1"
   },
   "private": true
 }
