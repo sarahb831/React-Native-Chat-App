@@ -56,6 +56,18 @@ firebase.initializeApp({
 
 In addition to the libraries indicated above (firebase and expo-cli), you'll need to install the following ones:
 
-1. These should have been installed automatically with expo-cli: React Native, React-Native-Dom, React-Native-Web (allows React Native to run on browsers as well, if not, add them as __react-native__, __react
+1. These should have been installed automatically with expo-cli: React Native, React-Dom, React-Native-Web (allows React Native to run on browsers as well, if not, add them as __react-native__, __react-dom__, __react-native-web__
 
+1. `$yarn add react-native-gesture-handler` for mobile device touch
 
+1. `$yarn add react-native-gifted-chat` for the Gifted Chat library used heavily in this app
+
+1.  `$yarn add react-native-keyboard-spacer` for handling Android keyboard overlap
+
+1. `$yarn add react-native-maps` to use <MapView />
+
+1. `$yarn add react-native-reanimated` also for gesture based interactions
+
+1. `$yarn add react-native-navigation` for getting users location
+
+1. `$yarn add uuid` for unique ids for messages and users
