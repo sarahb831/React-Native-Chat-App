@@ -56,4 +56,6 @@ firebase.initializeApp({
 
 In addition to the libraries indicated above (firebase and expo-cli), you'll need to install the following ones:
 
-1. 
+1. These should have been installed automatically with expo-cli: React Native, React-Native-Dom, React-Native-Web (allows React Native to run on browsers as well, if not, add them as __react-native__, __react
+
+
