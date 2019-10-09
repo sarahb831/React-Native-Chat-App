@@ -1,6 +1,6 @@
-#Getting Started
-##Setting up the Development Environment
-##Install Expo
+# Getting Started
+## Setting up the Development Environment
+## Install Expo
 
 To create new projects and start running Expo, 
 
