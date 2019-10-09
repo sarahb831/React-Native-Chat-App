@@ -1,6 +1,6 @@
 # Getting Started
 ## Setting up the Development Environment
-## Install Expo
+### Install Expo
 
 To create new projects and start running Expo, 
 
@@ -24,5 +24,6 @@ application's JavaScript with Babel, then serves it to the Expo app so that ES6+
 in the camera, so when the QR Code is centered within the yellow guides a pop-up will appear that allows
 you to open the project in Expo.
 
-## Database Configuration
+### Database Configuration
 
+This project uses Google Firebase/Firestore as the database for messages, in project "chat-ce808"
