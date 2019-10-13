@@ -1,3 +1,17 @@
+/**
+ * 
+ * Start.js contains the Start class, which allows the user to enter their user name and select a background
+ * color.
+ * 
+ * The KeyboardAvoidingView and KeyboardSpacer are used to prevent the Android keyboard
+ * from hiding the user's input text box.
+ * 
+ * When the user presses the "Start Chatting" button they are taken to the Chat
+ * screen with their color selection and user name passed to it as navigation props.
+ * 
+ * Their are no methods (other than render()) in this class.
+ *  
+ */
 import React, { Component } from 'react';
 import { Button, ImageBackground, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
