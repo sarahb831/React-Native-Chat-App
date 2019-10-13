@@ -1,5 +1,5 @@
 
-=======
+
 # Getting Started
 ## Setting up the Development Environment
 ### Install Expo
