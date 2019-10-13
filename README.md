@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-*** README.md
+
 =======
 # Getting Started
 ## Setting up the Development Environment
